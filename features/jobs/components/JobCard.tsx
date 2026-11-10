@@ -1,21 +1,30 @@
-"use client"
-
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
-import { Icon } from "./Icon"
+import { Icon } from "@/components/common/Icon"
 import { inter, interTight, manrope } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
+import type { JobTag } from "../types"
 
-/* Figma: Job List Card (master) — 424×363, #151516, r24. All six homepage
-   instances share the default content (no overrides). */
-const tags = [
+const defaultTags: JobTag[] = [
   { icon: "/icons/jc-location.svg", text: "New York, USA" },
   { icon: "/icons/jc-briefcase.svg", text: "Hybrid" },
   { icon: "/icons/jc-dollar.svg", text: "€25–€40/hour" },
 ]
 
-export function JobCard() {
+export interface JobCardProps {
+  title?: string
+  description?: string
+  tags?: JobTag[]
+  applyHref?: string
+}
+
+export function JobCard({
+  title = "Frontend Developer",
+  description = "Showcase your commitment to diversity and inclusion by highlighting initiatives",
+  tags = defaultTags,
+  applyHref = "/jobs",
+}: JobCardProps) {
   return (
     <article className="flex flex-col rounded-[24px] bg-[#151516] pt-8 pr-6 pb-6 pl-6 xl:h-90">
       <div className="flex flex-col gap-3">
@@ -25,7 +34,7 @@ export function JobCard() {
             "text-[26px] leading-[1.3] font-medium tracking-tighter text-white sm:text-[32px]"
           )}
         >
-          Frontend Developer
+          {title}
         </h3>
         <p
           className={cn(
@@ -33,8 +42,7 @@ export function JobCard() {
             "text-base leading-[1.7] tracking-[-0.02em] text-white/60"
           )}
         >
-          Showcase your commitment to diversity and inclusion by highlighting
-          initiatives
+          {description}
         </p>
       </div>
 
@@ -54,7 +62,7 @@ export function JobCard() {
       </div>
 
       <Button
-        render={<Link href="/jobs" />}
+        render={<Link href={applyHref} />}
         nativeButton={false}
         className={cn(
           manrope.className,

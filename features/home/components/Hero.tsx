@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Icon } from "./Icon"
+import { Icon } from "@/components/common/Icon"
 import { inter, manrope, spaceMono } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 
@@ -79,7 +79,7 @@ export function Hero() {
             />
             <Input
               name="q"
-              placeholder="Job tilte, skill or company"
+              placeholder="Job title, skill or company"
               aria-label="Job title, skill or company"
               className={searchFieldClass}
             />

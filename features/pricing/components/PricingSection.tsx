@@ -4,56 +4,17 @@ import { useState } from "react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
-import { Icon } from "./Icon"
-import { SectionLabel } from "./SectionLabel"
+import { Icon } from "@/components/common/Icon"
+import { SectionLabel } from "@/components/common/SectionLabel"
 import { inter, interTight, manrope, plusJakartaSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
-
-/* Figma: Pricing — toggle + 3× Price Card (424×450, r24) */
-const plans = [
-  {
-    icon: "/icons/price-icon-1.svg",
-    name: "Starter",
-    price: "$0",
-    features: [
-      "Daily AI match brief (top 5)",
-      "Verified salary bands",
-      "Company insight dashboards",
-      "1‑click apply, unlimited",
-    ],
-    featured: false,
-  },
-  {
-    icon: "/icons/price-icon-2.svg",
-    name: "Growth",
-    price: "$17",
-    features: [
-      "Daily AI match brief (top 5)",
-      "Verified salary bands",
-      "Company insight dashboards",
-      "1‑click apply, unlimited",
-    ],
-    featured: true,
-  },
-  {
-    icon: "/icons/price-icon-3.svg",
-    name: "Premium",
-    price: "$99",
-    features: [
-      "Everything in Pro",
-      "Multi-profile career portfolios",
-      "Shared talent rooms",
-      "Recruiter view (read-only)",
-    ],
-    featured: false,
-  },
-]
+import { plans } from "../data/plans"
 
 /* Figma: "Monthly -Yearly" — 257×59 container, white active pill (r40) */
 const toggleClass =
   "flex h-[43px] items-center rounded-[40px] border px-3 text-lg leading-[1.5] font-medium tracking-[-0.02em] transition-colors"
 
-export function Pricing() {
+export function PricingSection() {
   const [yearly, setYearly] = useState(false)
 
   return (

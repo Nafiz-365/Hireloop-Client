@@ -1,15 +1,14 @@
-"use client"
-
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { JobCard } from "./JobCard"
-import { SectionLabel } from "./SectionLabel"
+import { SectionLabel } from "@/components/common/SectionLabel"
 import { instrumentSans, manrope } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
+import { mockJobs } from "../data/mock-jobs"
 
 /* Figma: Frame 2147234472 — label + H2, 6 Job List Cards, centered CTA */
-export function Jobs() {
+export function JobsPreview() {
   return (
     <section className="pt-16 pb-16 xl:pt-30 xl:pb-30">
       <div className="mx-auto w-full max-w-360 px-4 sm:px-6 lg:px-10 xl:px-15">
@@ -26,8 +25,14 @@ export function Jobs() {
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }, (_, i) => (
-            <JobCard key={i} />
+          {mockJobs.map((job) => (
+            <JobCard
+              key={job.id}
+              title={job.title}
+              description={job.description}
+              tags={job.tags}
+              applyHref={job.applyUrl}
+            />
           ))}
         </div>
 

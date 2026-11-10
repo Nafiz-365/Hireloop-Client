@@ -1,12 +1,11 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
-import { Icon } from "./Icon"
-import { interTight, manrope } from "@/lib/fonts"
-import { cn } from "@/lib/utils"
 import Image from "next/image"
 
-/* Figma: Footer — 1320×385 card (r16) inside60px gutters */
+import { Button } from "@/components/ui/button"
+import { Icon } from "@/components/common/Icon"
+import { interTight, manrope } from "@/lib/fonts"
+import { cn } from "@/lib/utils"
+
+/* Figma: Footer — 1320×385 card (r16) inside 60px gutters */
 const columns = [
   {
     heading: "Product",

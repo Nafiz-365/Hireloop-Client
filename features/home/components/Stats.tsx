@@ -1,18 +1,7 @@
-import { Icon } from "./Icon"
+import { Icon } from "@/components/common/Icon"
 import { instrumentSans, interTight, plusJakartaSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
-
-/* Figma: Frame 2147234448 — heading + 4× Stats cards (312×254, r16) */
-const stats = [
-  { icon: "/icons/stat-job-search.svg", value: "50K", label: "Active Jobs" },
-  { icon: "/icons/stat-ranking.svg", value: "12K", label: "Companies" },
-  { icon: "/icons/stat-job-man.svg", value: "2M", label: "Job Seekers" },
-  {
-    icon: "/icons/stat-star.svg",
-    value: "97%",
-    label: "Satisfication Rate",
-  },
-]
+import { stats } from "../data/stats"
 
 /* Figma: GRADIENT_LINEAR #010102 → #313131, 12.22% → 177.27% (top → bottom) */
 const cardGradient =

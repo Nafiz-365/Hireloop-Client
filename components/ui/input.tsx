@@ -1,8 +1,14 @@
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input
+      // Browser extensions (temp-mail / autofill) inject attributes such as
+      // data-temp-mail-org + an icon background into inputs *before* React
+      // hydrates; React 19 treats extra DOM attributes as a fatal hydration
+      // mismatch and re-renders the whole subtree. Attribute-only differences
+      // are harmless here, so skip the comparison for this element.
+      suppressHydrationWarning
       type={type}
       data-slot="input"
       className={cn(

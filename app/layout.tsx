@@ -2,7 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 import { cn } from "@/lib/utils"
-import { Navbar } from "@/components/home/Navbar"
+import { Navbar } from "@/components/layout/Navbar"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 

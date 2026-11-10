@@ -1,12 +1,12 @@
 import Image from "next/image"
 
-import { Hero } from "@/components/home/Hero"
-import { Stats } from "@/components/home/Stats"
-import { Jobs } from "@/components/home/Jobs"
-import { Features } from "@/components/home/Features"
-import { Pricing } from "@/components/home/Pricing"
-import { Cta } from "@/components/home/Cta"
-import { Footer } from "@/components/home/Footer"
+import { Hero } from "@/features/home/components/Hero"
+import { Stats } from "@/features/home/components/Stats"
+import { JobsPreview } from "@/features/jobs/components/JobsPreview"
+import { Features } from "@/features/home/components/Features"
+import { PricingSection } from "@/features/pricing/components/PricingSection"
+import { Cta } from "@/features/home/components/Cta"
+import { Footer } from "@/components/layout/Footer"
 
 /**
  * Figma: Design → Homepage (12022:10424, 1440×5466, #010103).
@@ -35,9 +35,9 @@ export default function Page() {
       <div className="relative z-10">
         <Hero />
         <Stats />
-        <Jobs />
+        <JobsPreview />
         <Features />
-        <Pricing />
+        <PricingSection />
 
         {/* CTA + footer block (Figma y4502–5466) */}
         <div className="relative isolate mt-0 overflow-hidden xl:mt-5">
