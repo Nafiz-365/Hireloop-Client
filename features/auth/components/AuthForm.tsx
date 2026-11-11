@@ -1,12 +1,14 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 
 import { SectionLabel } from "@/components/common/SectionLabel"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { authClient } from "@/lib/auth-client"
 import { inter, interTight, manrope } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import type {
@@ -74,8 +76,7 @@ const copyByMode = {
     sub: "Pick up where you left off — your saved jobs and matches are waiting.",
     submit: "Sign in",
     pending: "Signing in…",
-    success:
-      "Sign-in data collected — check the browser console. Authentication will be wired up later.",
+    success: "Signed in — taking you to the homepage…",
     altPrompt: "New to HireLoop?",
     altAction: "Create an account",
     altHref: "/signup",
@@ -86,8 +87,7 @@ const copyByMode = {
     sub: "Build a profile in three minutes and start receiving matches tomorrow morning.",
     submit: "Create account",
     pending: "Creating account…",
-    success:
-      "Sign-up data collected — check the browser console. Authentication will be wired up later.",
+    success: "Account created — taking you to the homepage…",
     altPrompt: "Already have an account?",
     altAction: "Sign in",
     altHref: "/login",
@@ -114,16 +114,34 @@ const toggleClass = cn(
 
 /**
  * Single integration point for better-auth (see `lib/auth-client.ts`).
+ * Sends only the fields the API accepts — `confirmPassword` is UI-only.
+ * Returns an error message to display, or null on success.
  */
-async function handleSubmit(mode: AuthMode, values: AuthValues): Promise<void> {
-  // Placeholder until auth is wired up — swap for authClient.signIn/signUp.
-  console.log(`[auth:${mode}] collected form data`, values)
-  await Promise.resolve()
+async function handleSubmit(
+  mode: AuthMode,
+  values: AuthValues
+): Promise<string | null> {
+  const { error } =
+    mode === "signup"
+      ? await authClient.signUp.email({
+          name: values.name,
+          email: values.email,
+          password: values.password,
+        })
+      : await authClient.signIn.email({
+          email: values.email,
+          password: values.password,
+        })
+
+  if (!error) return null
+  return error.message || "Something went wrong. Please try again."
 }
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
+  const router = useRouter()
   const [errors, setErrors] = useState<AuthFieldErrors>({})
   const [status, setStatus] = useState<"idle" | "ok" | "error">("idle")
+  const [apiError, setApiError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [revealed, setRevealed] = useState<
     Partial<Record<AuthFieldName, boolean>>
@@ -141,6 +159,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
     const nextErrors = validateAuthForm(mode, values)
     setErrors(nextErrors)
+    setStatus("idle")
+    setApiError(null)
 
     if (Object.keys(nextErrors).length > 0) {
       setStatus("error")
@@ -148,9 +168,24 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     }
 
     setPending(true)
-    await handleSubmit(mode, values)
+
+    let apiErrorMessage: string | null = null
+    try {
+      apiErrorMessage = await handleSubmit(mode, values)
+    } catch {
+      apiErrorMessage = "Network error — check your connection and try again."
+    }
+
     setPending(false)
+
+    if (apiErrorMessage) {
+      setApiError(apiErrorMessage)
+      return
+    }
+
     setStatus("ok")
+    // Brief pause so the success message is visible before navigating.
+    window.setTimeout(() => router.replace("/"), 1200)
   }
 
   return (
@@ -251,7 +286,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                         role="alert"
                         className={cn(
                           inter.className,
-                          "text-sm leading-[1.5] text-[#ff8a96]"
+                          "text-sm leading-normal text-[#ff8a96]"
                         )}
                       >
                         {error}
@@ -267,10 +302,22 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 role="status"
                 className={cn(
                   inter.className,
-                  "rounded-[12px] border border-[#ff6b7a]/40 bg-[#ff6b7a]/10 px-4 py-3 text-sm leading-[1.5] text-[#ff8a96]"
+                  "rounded-[12px] border border-[#ff6b7a]/40 bg-[#ff6b7a]/10 px-4 py-3 text-sm leading-normal text-[#ff8a96]"
                 )}
               >
                 Please fix the highlighted fields and try again.
+              </p>
+            )}
+
+            {apiError && (
+              <p
+                role="alert"
+                className={cn(
+                  inter.className,
+                  "rounded-[12px] border border-[#ff6b7a]/40 bg-[#ff6b7a]/10 px-4 py-3 text-sm leading-normal text-[#ff8a96]"
+                )}
+              >
+                {apiError}
               </p>
             )}
 
@@ -279,7 +326,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 role="status"
                 className={cn(
                   inter.className,
-                  "rounded-[12px] border border-[#5c53fe]/40 bg-[#5c53fe]/10 px-4 py-3 text-sm leading-[1.5] text-white/80"
+                  "rounded-[12px] border border-[#5c53fe]/40 bg-[#5c53fe]/10 px-4 py-3 text-sm leading-normal text-white/80"
                 )}
               >
                 {copy.success}
