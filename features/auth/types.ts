@@ -1,6 +1,7 @@
 export type AuthMode = "signin" | "signup"
 
-export type AuthFieldName = "name" | "email" | "password" | "confirmPassword"
+export type AuthFieldName =
+  "name" | "email" | "password" | "confirmPassword" | "role"
 
 export type AuthValues = Record<string, string>
 

@@ -6,6 +6,7 @@ import type {
 } from "./types"
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+export const ROLE_VALUES = ["seeker", "recruiter", "admin"] as const
 
 export function validateAuthForm(
   mode: AuthMode,
@@ -39,6 +40,13 @@ export function validateAuthForm(
       errors.confirmPassword = "Please confirm your password."
     } else if (confirmPassword !== password) {
       errors.confirmPassword = "Passwords do not match."
+    }
+
+    const role = read("role")
+    if (!role) {
+      errors.role = "Please choose an account type."
+    } else if (!(ROLE_VALUES as readonly string[]).includes(role)) {
+      errors.role = "Invalid account type."
     }
   }
 

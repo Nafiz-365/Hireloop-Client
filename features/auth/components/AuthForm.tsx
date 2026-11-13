@@ -69,6 +69,12 @@ const fieldsByMode: Record<AuthMode, AuthFieldConfig[]> = {
   ],
 }
 
+const roleOptions = [
+  { value: "seeker", label: "Seeker" },
+  { value: "recruiter", label: "Recruiter" },
+  { value: "admin", label: "Admin" },
+] as const
+
 const copyByMode = {
   signin: {
     eyebrow: "Sign in",
@@ -121,12 +127,13 @@ async function handleSubmit(
   mode: AuthMode,
   values: AuthValues
 ): Promise<string | null> {
-  const { error } =
+  const { error, data: signUpResponse } =
     mode === "signup"
       ? await authClient.signUp.email({
           name: values.name,
           email: values.email,
           password: values.password,
+          role: values.role,
         })
       : await authClient.signIn.email({
           email: values.email,
@@ -134,6 +141,7 @@ async function handleSubmit(
           // Unchecked checkboxes are omitted from FormData — key absent = false.
           rememberMe: "rememberMe" in values,
         })
+  console.log("signUpResponse", signUpResponse)
 
   if (!error) return null
   return error.message || "Something went wrong. Please try again."
@@ -298,6 +306,55 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 )
               })}
             </div>
+
+            {mode === "signup" && (
+              <div className="flex flex-col gap-2">
+                <span
+                  id="auth-role-label"
+                  className={cn(
+                    interTight.className,
+                    "text-sm leading-normal font-medium text-white/70"
+                  )}
+                >
+                  I am a
+                </span>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="auth-role-label"
+                  className="flex flex-wrap gap-x-5 gap-y-2"
+                >
+                  {roleOptions.map((option) => (
+                    <label
+                      key={option.value}
+                      className={cn(
+                        inter.className,
+                        "flex cursor-pointer items-center gap-2 text-sm leading-normal text-white/70"
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="role"
+                        value={option.value}
+                        defaultChecked={option.value === "seeker"}
+                        className="size-4 shrink-0 cursor-pointer accent-[#5c53fe]"
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+                {errors.role && (
+                  <p
+                    role="alert"
+                    className={cn(
+                      inter.className,
+                      "text-sm leading-normal text-[#ff8a96]"
+                    )}
+                  >
+                    {errors.role}
+                  </p>
+                )}
+              </div>
+            )}
 
             {mode === "signin" && (
               <label
