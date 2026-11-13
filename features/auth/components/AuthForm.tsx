@@ -131,6 +131,8 @@ async function handleSubmit(
       : await authClient.signIn.email({
           email: values.email,
           password: values.password,
+          // Unchecked checkboxes are omitted from FormData — key absent = false.
+          rememberMe: "rememberMe" in values,
         })
 
   if (!error) return null
@@ -296,6 +298,25 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 )
               })}
             </div>
+
+            {mode === "signin" && (
+              <label
+                htmlFor="auth-rememberMe"
+                className={cn(
+                  inter.className,
+                  "flex w-fit cursor-pointer items-center gap-2 text-sm leading-normal text-white/60"
+                )}
+              >
+                <input
+                  id="auth-rememberMe"
+                  name="rememberMe"
+                  type="checkbox"
+                  defaultChecked
+                  className="size-4 shrink-0 cursor-pointer accent-[#5c53fe]"
+                />
+                Remember me
+              </label>
+            )}
 
             {status === "error" && (
               <p
