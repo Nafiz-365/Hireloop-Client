@@ -72,14 +72,18 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Sidebar tokens (shadcn Sidebar component). The app is dark-only — there is
+     no `.dark` class to flip these — so they carry the Figma `HL 2.0/Sidebar`
+     colors instead of the stock light ones. `@theme inline` maps them to the
+     `bg-sidebar` / `text-sidebar-*` utilities. */
+  --sidebar: #08080a;
+  --sidebar-foreground: #f4f4f5;
+  --sidebar-primary: #5c53fe;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #232327;
+  --sidebar-accent-foreground: #f4f4f5;
+  --sidebar-border: rgb(255 255 255 / 6%);
+  --sidebar-ring: #5c53fe;
 }
 
 .dark {

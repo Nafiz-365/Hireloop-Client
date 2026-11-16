@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { LogOutIcon, MenuIcon, XIcon } from "lucide-react"
+import { LayoutDashboardIcon, LogOutIcon, MenuIcon, XIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,7 @@ import {
 import { instrumentSans, manrope } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import { authClient } from "@/lib/auth-client"
+import { normalizeRole, roleHome } from "@/features/dashboard/data/nav"
 
 const navLinks = [
   { href: "/jobs", label: "Browse Jobs" },
@@ -59,6 +60,15 @@ type SessionUser = NonNullable<
   ReturnType<typeof authClient.useSession>["data"]
 >["user"]
 
+/* Where "Dashboard" sends this user — pre-role accounts fall back to seeker. */
+function dashboardHref(user: SessionUser) {
+  return roleHome[
+    normalizeRole(
+      "role" in user ? (user.role as string | null | undefined) : undefined
+    )
+  ]
+}
+
 /* Avatar-only trigger → dropdown with identity (name / email / role badge) and
    Sign Out. Shared by the desktop cluster and the mobile bar (Option A — same
    interaction on both breakpoints). */
@@ -75,7 +85,7 @@ function UserMenu({
         aria-label="Account menu"
         className="flex cursor-pointer items-center rounded-full p-1.5 text-white transition-colors outline-none hover:bg-white/10 focus-visible:bg-white/10"
       >
-        <Avatar size="sm" className="border border-white/15">
+        <Avatar className="border border-white/15">
           <AvatarImage src={user.image ?? undefined} alt="" />
           <AvatarFallback className="bg-[#5c53fe]/15 font-medium text-[#5c53fe]">
             {userInitial(user.name)}
@@ -113,6 +123,16 @@ function UserMenu({
         <DropdownMenuSeparator className="bg-white/10" />
 
         <DropdownMenuItem
+          render={<Link href={dashboardHref(user)} />}
+          className="gap-2.5 rounded-[8px] px-2.5 py-2 text-sm text-white/80 focus:bg-white/10 focus:text-white"
+        >
+          <LayoutDashboardIcon className="size-4" />
+          Dashboard
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator className="bg-white/10" />
+
+        <DropdownMenuItem
           onClick={onSignOut}
           className="gap-2.5 rounded-[8px] px-2.5 py-2 text-sm text-white/80 focus:bg-white/10 focus:text-white"
         >
@@ -135,6 +155,12 @@ export function Navbar() {
     // better-auth clears the client session cache — state re-renders logged-out.
   }
 
+  /* "Dashboard" is appended for signed-in users only and resolves to that
+     user's role home (seeker/recruiter/admin). */
+  const links = session?.user
+    ? [...navLinks, { href: dashboardHref(session.user), label: "Dashboard" }]
+    : navLinks
+
   return (
     <nav className="z-30 flex h-18 w-full items-center justify-between rounded-[16px] bg-[#222222] py-2 pr-2 pl-6">
       <Link href="/" className="shrink-0" aria-label="HireLoop home">
@@ -151,7 +177,7 @@ export function Navbar() {
       {/* Desktop — Figma nav-bar: links · divider · actions */}
       <div className="hidden h-14 items-center gap-6 lg:flex">
         <ul className="flex items-center gap-10">
-          {navLinks.map((link) => (
+          {links.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
@@ -234,7 +260,7 @@ export function Navbar() {
 
             <div className="flex flex-1 flex-col justify-between gap-6">
               <ul className="flex flex-col gap-1">
-                {navLinks.map((link) => (
+                {links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
