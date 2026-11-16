@@ -62,6 +62,17 @@ function SidebarNav({
   onLinkClick: () => void
   dimmed?: boolean
 }) {
+  /* Longest match wins so `…/jobs/new` lights up "Add Job" only — not both
+     it and the shorter "Manage Jobs" prefix (`…/jobs`). The dashboard home
+     stays exact-match so its sub-routes never light it up. */
+  const activeHref = items.reduce<string>((best, item) => {
+    const match =
+      item.href === homeHref
+        ? pathname === homeHref
+        : pathname === item.href || pathname.startsWith(item.href + "/")
+    return match && item.href.length > best.length ? item.href : best
+  }, "")
+
   return (
     <SidebarGroup className="gap-1 p-0">
       <SidebarGroupLabel
@@ -76,12 +87,7 @@ function SidebarNav({
       <SidebarGroupContent>
         <SidebarMenu className="gap-1">
           {items.map((item) => {
-            // The dashboard home is active only on its exact route; every other
-            // item also covers its sub-routes (e.g. /dashboard/recruiter/jobs/new).
-            const active =
-              item.href === homeHref
-                ? pathname === homeHref
-                : pathname === item.href || pathname.startsWith(item.href + "/")
+            const active = item.href === activeHref
             const Icon = item.icon
 
             return (

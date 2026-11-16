@@ -5,6 +5,7 @@ import {
   Building2Icon,
   BuildingIcon,
   CreditCardIcon,
+  FilePlusIcon,
   FileTextIcon,
   HomeIcon,
   LayoutDashboardIcon,
@@ -69,6 +70,11 @@ export const roleNav: Record<Role, NavItem[]> = {
       href: "/dashboard/recruiter/company",
       label: "My Company",
       icon: Building2Icon,
+    },
+    {
+      href: "/dashboard/recruiter/jobs/new",
+      label: "Add Job",
+      icon: FilePlusIcon,
     },
     {
       href: "/dashboard/recruiter/jobs",
