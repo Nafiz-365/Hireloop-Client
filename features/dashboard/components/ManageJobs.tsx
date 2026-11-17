@@ -71,6 +71,10 @@ const itemClass =
 
 // Fetch jobs from the API
 export function ManageJobs() {
+  const [rows, setRows] = useState<ManageJobRow[]>([])
+  const [status, setStatus] = useState<StatusFilter>("All")
+  const [category, setCategory] = useState("all")
+
   useEffect(() => {
     // Define an asynchronous function to fetch jobs
     async function fetchJobs() {
@@ -80,10 +84,6 @@ export function ManageJobs() {
     // Execute the fetch function.
     fetchJobs()
   }, [])
-
-  const [rows, setRows] = useState<ManageJobRow[]>([])
-  const [status, setStatus] = useState<StatusFilter>("All")
-  const [category, setCategory] = useState("all")
 
   /* Chip counts reflect the category filter (so numbers always match the
      rows on screen); the status filter narrows the visible table only. */
@@ -103,9 +103,6 @@ export function ManageJobs() {
     status === "All"
       ? categoryRows
       : categoryRows.filter((row) => row.status === status)
-
-  /* Plan usage counts every active post, regardless of the current view. */
-  const activeCount = rows.filter((row) => row.status === "Active").length
 
   function toggleStatus(id: string) {
     setRows((prev) =>
