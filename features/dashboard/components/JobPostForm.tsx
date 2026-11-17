@@ -37,7 +37,7 @@ import { createJob } from "@/lib/actions/jobs"
  * API comes in a later phase (same pattern as the homepage mock data).
  */
 
-const categories = [
+export const categories = [
   { value: "engineering-tech", label: "Engineering & Tech" },
   { value: "design", label: "Design" },
   { value: "marketing", label: "Marketing" },
@@ -646,7 +646,7 @@ function PreviewSection({ title, body }: { title: string; body: string }) {
   )
 }
 
-function categoryLabel(value: string) {
+export function categoryLabel(value: string) {
   return categories.find((category) => category.value === value)?.label ?? value
 }
 

@@ -1,14 +1,18 @@
 /**
- * Static mock content for the three dashboard home screens.
+ * Static mock content for the dashboard screens (including the recruiter
+ * Manage Jobs table).
  *
  * Text is decoded from Figma `hireloop.fig` → Hireloop 2.0:
  *   - Seeker    → section `02 · Job Seeker`    (frame 12018:1236)
  *   - Recruiter → section `03 · Recruiter`     (frame 12018:2202)
  *   - Admin     → section `04 · Admin Console` (frame 12018:3084)
+ *   - Manage Jobs rows reuse the sample titles from `Admin / Manage Jobs`.
  *
  * The homepage follows the same pattern (static mock data first); a content
  * API comes later.
  */
+
+import type { FormValues } from "@/features/dashboard/components/JobPostForm"
 
 /* ── Seeker ─────────────────────────────────────────────────────────────── */
 
