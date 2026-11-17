@@ -2,11 +2,17 @@
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react"
 import Link from "next/link"
-import { ChevronRightIcon } from "lucide-react"
+import {
+  Building2Icon,
+  ChevronRightIcon,
+  DollarSignIcon,
+  GlobeIcon,
+  MapPinIcon,
+  SendIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -16,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { createJob } from "@/lib/actions/jobs"
@@ -64,14 +71,15 @@ type FormErrors = Partial<Record<keyof FormValues, string>>
 const initialValues: FormValues = {
   jobTitle: "",
   companyName: "",
-  jobCategory: "",
+  // Figma shows both selects with a value already chosen.
+  jobCategory: "engineering-tech",
   jobType: "Full-time",
   isRemote: false,
   location: "",
   deadline: "",
   minSalary: "",
   maxSalary: "",
-  frequency: "",
+  frequency: "per hour",
   responsibilities: "",
   qualifications: "",
 }
@@ -160,7 +168,7 @@ export function JobPostForm() {
         <div className="flex flex-col gap-2">
           <nav
             aria-label="Breadcrumb"
-            className="flex items-center gap-1.5 text-sm text-white/50"
+            className="flex items-center gap-1.5 text-sm font-medium text-white/50"
           >
             <Link
               href="/dashboard/recruiter/jobs"
@@ -169,11 +177,9 @@ export function JobPostForm() {
               Manage Jobs
             </Link>
             <ChevronRightIcon className="size-3.5" aria-hidden="true" />
-            <span className="font-medium text-white/80">
-              Create New Listing
-            </span>
+            <span className="text-white/80">Create New Listing</span>
           </nav>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-medium tracking-tight text-white">
             Post a New Job
           </h1>
           <p className="text-sm text-white/60">
@@ -184,9 +190,10 @@ export function JobPostForm() {
 
         <Button
           type="submit"
-          className="h-9 rounded-[10px] bg-[#5c53fe] px-4 text-white hover:bg-[#4a42f0]"
+          className="h-9 gap-2 rounded-[10px] bg-[#5c53fe] px-4 text-white shadow-[0_8px_24px_-8px_rgba(92,83,254,0.55)] hover:bg-[#4a42f0]"
         >
           Publish Job
+          <SendIcon className="size-4" />
         </Button>
       </header>
 
@@ -214,7 +221,7 @@ export function JobPostForm() {
           {/* 1. Basic Information */}
           <Card className="bg-[#141418] text-white ring-white/6">
             <CardHeader className="px-5">
-              <CardTitle className="text-base font-semibold text-white">
+              <CardTitle className="text-base text-white">
                 1. Basic Information
               </CardTitle>
             </CardHeader>
@@ -239,14 +246,20 @@ export function JobPostForm() {
                   <Label htmlFor="companyName" className={labelClass}>
                     Company Name <span aria-hidden="true">*</span>
                   </Label>
-                  <Input
-                    id="companyName"
-                    name="companyName"
-                    placeholder="HirePulse Network"
-                    aria-invalid={errors.companyName ? true : undefined}
-                    className={fieldClass}
-                    onChange={onField("companyName")}
-                  />
+                  <div className="relative">
+                    <Building2Icon
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/35"
+                    />
+                    <Input
+                      id="companyName"
+                      name="companyName"
+                      placeholder="HirePulse Network"
+                      aria-invalid={errors.companyName ? true : undefined}
+                      className={cn(fieldClass, "pl-9")}
+                      onChange={onField("companyName")}
+                    />
+                  </div>
                   {errors.companyName && (
                     <FieldError>{errors.companyName}</FieldError>
                   )}
@@ -324,26 +337,17 @@ export function JobPostForm() {
           {/* 2. Location, Compensation & Timeline */}
           <Card className="bg-[#141418] text-white ring-white/6">
             <CardHeader className="px-5">
-              <CardTitle className="text-base font-semibold text-white">
+              <CardTitle className="text-base text-white">
                 2. Location, Compensation &amp; Timeline
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4 px-5 pb-5">
-              <div className="flex items-start gap-3 rounded-[10px] border border-white/10 bg-[#0c0c0f] p-3.5">
-                <Checkbox
-                  id="isRemote"
-                  name="isRemote"
-                  checked={values.isRemote}
-                  onCheckedChange={(checked) => {
-                    setValues((prev) => ({
-                      ...prev,
-                      isRemote: checked === true,
-                    }))
-                    setStatus("idle")
-                  }}
-                  className="mt-0.5 border-white/25 data-checked:border-[#5c53fe] data-checked:bg-[#5c53fe]"
+              <div className="flex items-center gap-3 rounded-[10px] border border-white/10 bg-[#0c0c0f] p-3.5">
+                <GlobeIcon
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-white/50"
                 />
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-1 flex-col gap-0.5">
                   <Label
                     htmlFor="isRemote"
                     className="text-sm font-medium text-white"
@@ -354,24 +358,43 @@ export function JobPostForm() {
                     Enable worldwide or distributed candidate applications
                   </p>
                 </div>
+                <Switch
+                  id="isRemote"
+                  name="isRemote"
+                  checked={values.isRemote}
+                  onCheckedChange={(checked) => {
+                    setValues((prev) => ({
+                      ...prev,
+                      isRemote: checked === true,
+                    }))
+                    setStatus("idle")
+                  }}
+                  className="data-checked:bg-[#5c53fe] dark:data-unchecked:bg-white/15"
+                />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="location" className={labelClass}>
                     Job Location{" "}
-                    <span className="text-xs font-normal text-white/40">
+                    <span className="text-xs font-medium text-white/40">
                       Required
                     </span>
                   </Label>
-                  <Input
-                    id="location"
-                    name="location"
-                    placeholder="New York, USA"
-                    aria-invalid={errors.location ? true : undefined}
-                    className={fieldClass}
-                    onChange={onField("location")}
-                  />
+                  <div className="relative">
+                    <MapPinIcon
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/35"
+                    />
+                    <Input
+                      id="location"
+                      name="location"
+                      placeholder="New York, USA"
+                      aria-invalid={errors.location ? true : undefined}
+                      className={cn(fieldClass, "pl-9")}
+                      onChange={onField("location")}
+                    />
+                  </div>
                   {errors.location && (
                     <FieldError>{errors.location}</FieldError>
                   )}
@@ -396,31 +419,43 @@ export function JobPostForm() {
                   <Label htmlFor="minSalary" className={labelClass}>
                     Min Salary / Rate
                   </Label>
-                  <Input
-                    id="minSalary"
-                    name="minSalary"
-                    type="number"
-                    min={0}
-                    placeholder="25"
-                    className={fieldClass}
-                    onChange={onField("minSalary")}
-                  />
+                  <div className="relative">
+                    <DollarSignIcon
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/35"
+                    />
+                    <Input
+                      id="minSalary"
+                      name="minSalary"
+                      type="number"
+                      min={0}
+                      placeholder="25"
+                      className={cn(fieldClass, "pl-9")}
+                      onChange={onField("minSalary")}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="maxSalary" className={labelClass}>
                     Max Salary / Rate
                   </Label>
-                  <Input
-                    id="maxSalary"
-                    name="maxSalary"
-                    type="number"
-                    min={0}
-                    placeholder="40"
-                    aria-invalid={errors.maxSalary ? true : undefined}
-                    className={fieldClass}
-                    onChange={onField("maxSalary")}
-                  />
+                  <div className="relative">
+                    <DollarSignIcon
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/35"
+                    />
+                    <Input
+                      id="maxSalary"
+                      name="maxSalary"
+                      type="number"
+                      min={0}
+                      placeholder="40"
+                      aria-invalid={errors.maxSalary ? true : undefined}
+                      className={cn(fieldClass, "pl-9")}
+                      onChange={onField("maxSalary")}
+                    />
+                  </div>
                   {errors.maxSalary && (
                     <FieldError>{errors.maxSalary}</FieldError>
                   )}
@@ -465,7 +500,7 @@ export function JobPostForm() {
           {/* 3. Responsibilities & Requirements */}
           <Card className="bg-[#141418] text-white ring-white/6">
             <CardHeader className="px-5">
-              <CardTitle className="text-base font-semibold text-white">
+              <CardTitle className="text-base text-white">
                 3. Responsibilities &amp; Requirements
               </CardTitle>
             </CardHeader>
@@ -478,7 +513,7 @@ export function JobPostForm() {
                   id="responsibilities"
                   name="responsibilities"
                   rows={5}
-                  placeholder="Showcase your commitment to delivering exceptional user interfaces and digital experiences…"
+                  placeholder="Showcase your commitment to delivering exceptional user interfaces and digital experiences. You will collaborate directly with systems designers and backend engineers to craft responsive, micro-interaction rich products."
                   aria-invalid={errors.responsibilities ? true : undefined}
                   className={cn(fieldClass, "h-auto min-h-32 py-2.5")}
                   onChange={onField("responsibilities")}
@@ -497,7 +532,9 @@ export function JobPostForm() {
                   id="qualifications"
                   name="qualifications"
                   rows={5}
-                  placeholder="3+ years of experience with React, TypeScript…"
+                  placeholder={
+                    "3+ years of experience with React, TypeScript, and modern state architectures\nSolid understanding of DOM performance and component-driven designs\nExperience partnering closely with product teams and UI/UX designers"
+                  }
                   aria-invalid={errors.qualifications ? true : undefined}
                   className={cn(fieldClass, "h-auto min-h-32 py-2.5")}
                   onChange={onField("qualifications")}
@@ -510,8 +547,10 @@ export function JobPostForm() {
           </Card>
         </div>
 
-        {/* Figma: Live Preview 40% */}
-        <aside className="lg:sticky lg:top-6">
+        {/* Figma: Live Preview 40% — sticks to the vertical center of the
+            viewport while the form column scrolls; caps its own height and
+            scrolls internally so a filled-out preview is never cut off. */}
+        <aside className="lg:sticky lg:top-[50vh] lg:max-h-[calc(100vh-3rem)] lg:-translate-y-1/2 lg:overflow-y-auto">
           <Card className="bg-[#141418] text-white ring-white/6">
             <CardHeader className="px-5">
               <CardTitle className="text-base font-semibold text-white">
