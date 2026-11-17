@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { createJob } from "@/lib/actions/jobs"
 
 /**
  * Figma: `hireloop.fig` → Hireloop 2.0 → `Add New Job` — "Post a New Job".
@@ -43,7 +44,7 @@ const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"] as const
 
 const frequencies = ["per hour", "per day", "per month", "per year"]
 
-type FormValues = {
+export type FormValues = {
   jobTitle: string
   companyName: string
   jobCategory: string
@@ -127,7 +128,7 @@ export function JobPostForm() {
     }
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const nextErrors = validate(values)
@@ -138,6 +139,9 @@ export function JobPostForm() {
     setStatus("ok")
     formRef.current?.reset()
     setValues(initialValues)
+
+    const result = await createJob(values)
+    console.log("Job creation result:", result)
 
     // console.log("Demo publish:", values)
   }
