@@ -45,6 +45,8 @@ import {
 
 import { cn } from "@/lib/utils"
 import { getJobs } from "@/lib/api/jobs"
+import { deleteJob } from "@/lib/actions/jobs"
+import { toast } from "@/components/ui/toast"
 
 type ManageJobRow = FormValues & {
   _id: string
@@ -116,10 +118,23 @@ export function ManageJobs() {
       )
     )
   }
-
-  function deleteRow(row: ManageJobRow) {
-    if (window.confirm(`Delete "${row.jobTitle}"? This cannot be undone.`)) {
-      setRows((prev) => prev.filter((r) => r._id !== row._id))
+  async function deleteRow(row: ManageJobRow) {
+    try {
+      const res = await deleteJob(row._id)
+      if (res.acknowledged) {
+        setRows((prev) => prev.filter((r) => r._id !== row._id))
+        toast.add({
+          type: "success",
+          title: "Job deleted",
+          description: `Successfully deleted "${row.jobTitle}".`,
+        })
+      }
+    } catch {
+      toast.add({
+        type: "error",
+        title: "Delete failed",
+        description: "Something went wrong. Please try again.",
+      })
     }
   }
 

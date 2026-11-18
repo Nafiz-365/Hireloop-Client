@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 import { cn } from "@/lib/utils"
+import { Toaster } from "@/components/ui/toast"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -25,7 +26,10 @@ export default function RootLayout({
         geist.variable
       )}
     >
-      <body className="bg-[#010103] text-white">{children}</body>
+      <body className="bg-[#010103] text-white">
+        {children}
+        <Toaster />
+      </body>
     </html>
   )
 }
