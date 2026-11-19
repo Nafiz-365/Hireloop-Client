@@ -51,9 +51,6 @@ import { toast } from "@/components/ui/toast"
 type ManageJobRow = FormValues & {
   _id: string
   ref: string
-  status: "Active" | "Closed" | "Draft"
-  applicants: number
-  datePosted: string
 }
 
 type StatusFilter = "All" | ManageJobRow["status"]

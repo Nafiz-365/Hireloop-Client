@@ -26,6 +26,9 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { createJob } from "@/lib/actions/jobs"
+import { toast } from "@/components/ui/toast"
+import { useRouter } from "next/navigation"
+
 
 /**
  * Figma: `hireloop.fig` → Hireloop 2.0 → `Add New Job` — "Post a New Job".
@@ -64,6 +67,9 @@ export type FormValues = {
   frequency: string
   responsibilities: string
   qualifications: string
+  status: "Active" | "Closed" | "Draft"
+  applicants: number
+  datePosted: string
 }
 
 type FormErrors = Partial<Record<keyof FormValues, string>>
@@ -82,6 +88,13 @@ const initialValues: FormValues = {
   frequency: "per hour",
   responsibilities: "",
   qualifications: "",
+  status: "Draft",
+  applicants: 0,
+  datePosted: new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }),
 }
 
 /* Figma dashboard tokens — same treatment as the recruiter home cards. */
@@ -136,6 +149,8 @@ export function JobPostForm() {
     }
   }
 
+  const router = useRouter()
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -149,7 +164,15 @@ export function JobPostForm() {
     setValues(initialValues)
 
     const result = await createJob(values)
-    console.log("Job creation result:", result)
+    if (result.insertedId) {
+      console.log("Job created successfully:", result)
+      toast.add({
+        type: "success",
+        title: "Job created",
+        description: "Your job has been created successfully.",
+      })
+      router.push("/dashboard/recruiter/jobs")
+    }
 
     // console.log("Demo publish:", values)
   }
