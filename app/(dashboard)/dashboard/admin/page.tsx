@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table"
 import { StatCard } from "@/features/dashboard/components/StatCard"
 import { adminStats, adminTransactions } from "@/features/dashboard/data/mock"
+import { primaryButtonClass } from "@/features/dashboard/ui"
 import { cn } from "@/lib/utils"
 
 const statusClass: Record<string, string> = {
@@ -52,7 +53,7 @@ export default function AdminDashboardPage() {
             Last 30 Days
             <ChevronDownIcon className="size-4" />
           </Button>
-          <Button className="h-9 gap-2 rounded-[10px] bg-[#5c53fe] px-4 text-white hover:bg-[#4a42f0]">
+          <Button className={primaryButtonClass}>
             <DownloadIcon className="size-4" />
             Export Report
           </Button>

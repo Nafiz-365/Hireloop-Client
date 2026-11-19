@@ -24,6 +24,7 @@ import {
   recruiterStats,
 } from "@/features/dashboard/data/mock"
 import { auth } from "@/lib/auth"
+import { primaryButtonClass } from "@/features/dashboard/ui"
 import { cn } from "@/lib/utils"
 
 const statusClass: Record<string, string> = {
@@ -51,7 +52,7 @@ export default async function RecruiterDashboardPage() {
         <Button
           render={<Link href="/dashboard/recruiter/jobs/new" />}
           nativeButton={false}
-          className="h-9 rounded-[10px] bg-[#5c53fe] px-4 text-white hover:bg-[#4a42f0]"
+          className={primaryButtonClass}
         >
           Create Job Post
         </Button>

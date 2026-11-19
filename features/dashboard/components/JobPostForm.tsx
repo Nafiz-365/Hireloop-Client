@@ -28,7 +28,8 @@ import { cn } from "@/lib/utils"
 import { createJob } from "@/lib/actions/jobs"
 import { toast } from "@/components/ui/toast"
 import { useRouter } from "next/navigation"
-
+import type { FormValues } from "@/features/dashboard/types"
+import { primaryButtonClass } from "@/features/dashboard/ui"
 
 /**
  * Figma: `hireloop.fig` → Hireloop 2.0 → `Add New Job` — "Post a New Job".
@@ -53,24 +54,6 @@ export const categories = [
 const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"] as const
 
 const frequencies = ["per hour", "per day", "per month", "per year"]
-
-export type FormValues = {
-  jobTitle: string
-  companyName: string
-  jobCategory: string
-  jobType: string
-  isRemote: boolean
-  location: string
-  deadline: string
-  minSalary: string
-  maxSalary: string
-  frequency: string
-  responsibilities: string
-  qualifications: string
-  status: "Active" | "Closed" | "Draft"
-  applicants: number
-  datePosted: string
-}
 
 type FormErrors = Partial<Record<keyof FormValues, string>>
 
@@ -213,7 +196,10 @@ export function JobPostForm() {
 
         <Button
           type="submit"
-          className="h-9 gap-2 rounded-[10px] bg-[#5c53fe] px-4 text-white shadow-[0_8px_24px_-8px_rgba(92,83,254,0.55)] hover:bg-[#4a42f0]"
+          className={cn(
+            primaryButtonClass,
+            "shadow-[0_8px_24px_-8px_rgba(92,83,254,0.55)]"
+          )}
         >
           Publish Job
           <SendIcon className="size-4" />

@@ -37,23 +37,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ConfirmDialog } from "@/components/common/ConfirmDialog"
 import {
   categories,
   categoryLabel,
-  FormValues,
 } from "@/features/dashboard/components/JobPostForm"
-
+import type { ManageJobRow, StatusFilter } from "@/features/dashboard/types"
+import { primaryButtonClass } from "@/features/dashboard/ui"
 import { cn } from "@/lib/utils"
 import { getJobs } from "@/lib/api/jobs"
 import { deleteJob } from "@/lib/actions/jobs"
 import { toast } from "@/components/ui/toast"
 
-type ManageJobRow = FormValues & {
-  _id: string
-  ref: string
-}
-
-type StatusFilter = "All" | ManageJobRow["status"]
+/**
+ * Figma: `hireloop.fig` → Hireloop 2.0 → `Admin / Manage Jobs` (the file has
+ * no recruiter variant) + spec `Project requirements.md` → *Manage Jobs*.
+ * Rows are fetched from the content API (`getJobs()`); filtering, Close/
+ * Reopen and the delete confirmation are client-side.
+ */
 
 const statusFilters: StatusFilter[] = ["All", "Active", "Closed", "Draft"]
 
@@ -68,20 +69,46 @@ const filterItems = [{ value: "all", label: "All Categories" }, ...categories]
 const itemClass =
   "gap-2.5 rounded-[8px] px-2.5 py-2 text-sm text-white/80 focus:bg-white/10 focus:text-white"
 
-// Fetch jobs from the API
+/* Repeated table styling — one definition instead of ~20 copies. */
+const headClass = "text-white/50"
+const cellClass = "px-3 py-3.5"
+const bodyClass = "px-3 py-3.5 text-white/70"
+
 export function ManageJobs() {
   const [rows, setRows] = useState<ManageJobRow[]>([])
   const [status, setStatus] = useState<StatusFilter>("All")
   const [category, setCategory] = useState("all")
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Define an asynchronous function to fetch jobs
+    let cancelled = false
+
     async function fetchJobs() {
-      const jobs = await getJobs()
-      setRows(jobs)
+      try {
+        const jobs = await getJobs()
+        if (!cancelled) {
+          setRows(jobs)
+          setLoadError(null)
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadError("Couldn't load jobs. Please try again later.")
+          toast.add({
+            type: "error",
+            title: "Loading failed",
+            description: "Something went wrong while fetching jobs.",
+          })
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-    // Execute the fetch function.
+
     fetchJobs()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   /* Chip counts reflect the category filter (so numbers always match the
@@ -115,15 +142,22 @@ export function ManageJobs() {
       )
     )
   }
+
   async function deleteRow(row: ManageJobRow) {
     try {
       const res = await deleteJob(row._id)
-      if (res.acknowledged) {
+      if (res?.acknowledged) {
         setRows((prev) => prev.filter((r) => r._id !== row._id))
         toast.add({
           type: "success",
           title: "Job deleted",
           description: `Successfully deleted "${row.jobTitle}".`,
+        })
+      } else {
+        toast.add({
+          type: "error",
+          title: "Delete failed",
+          description: "The server didn't confirm the deletion.",
         })
       }
     } catch {
@@ -134,6 +168,10 @@ export function ManageJobs() {
       })
     }
   }
+
+  const emptyMessage = loading
+    ? "Loading jobs…"
+    : (loadError ?? "No jobs match the current filters.")
 
   return (
     <div className="flex flex-col gap-6">
@@ -151,8 +189,7 @@ export function ManageJobs() {
           <Button
             render={<Link href="/dashboard/recruiter/jobs/new" />}
             nativeButton={false}
-
-            className="h-9 gap-2 rounded-[10px] bg-[#5c53fe] px-4 text-white hover:bg-[#4a42f0]"
+            className={primaryButtonClass}
           >
             <PlusIcon className="size-4" />
             Post New Job
@@ -215,35 +252,35 @@ export function ManageJobs() {
           <Table className="min-w-120 lg:min-w-180 [&_tr]:border-white/6">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-white/50">Job Title</TableHead>
-                <TableHead className="hidden text-white/50 lg:table-cell">
+                <TableHead className={headClass}>Job Title</TableHead>
+                <TableHead className={cn("hidden lg:table-cell", headClass)}>
                   Category
                 </TableHead>
-                <TableHead className="hidden text-white/50 lg:table-cell">
+                <TableHead className={cn("hidden lg:table-cell", headClass)}>
                   Type
                 </TableHead>
-                <TableHead className="text-white/50">Applicants</TableHead>
-                <TableHead className="text-white/50">Date Posted</TableHead>
-                <TableHead className="text-white/50">Status</TableHead>
-                <TableHead className="text-right text-white/50">
+                <TableHead className={headClass}>Applicants</TableHead>
+                <TableHead className={headClass}>Date Posted</TableHead>
+                <TableHead className={headClass}>Status</TableHead>
+                <TableHead className={cn("text-right", headClass)}>
                   Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {visible.length === 0 ? (
-                <TableRow key="no-results" className="hover:bg-transparent">
+                <TableRow key="empty" className="hover:bg-transparent">
                   <TableCell
                     colSpan={7}
-                    className="px-3 py-10 text-center text-white/50"
+                    className={cn(cellClass, "py-10 text-center text-white/50")}
                   >
-                    No jobs match the current filters.
+                    {emptyMessage}
                   </TableCell>
                 </TableRow>
               ) : (
                 visible.map((row) => (
                   <TableRow key={row._id} className="hover:bg-white/3">
-                    <TableCell className="px-3 py-3.5">
+                    <TableCell className={cellClass}>
                       <span className="block font-medium text-white">
                         {row.jobTitle}
                       </span>
@@ -251,19 +288,23 @@ export function ManageJobs() {
                         Ref: {row.ref}
                       </span>
                     </TableCell>
-                    <TableCell className="hidden px-3 py-3.5 text-white/70 lg:table-cell">
+                    <TableCell
+                      className={cn("hidden lg:table-cell", bodyClass)}
+                    >
                       {categoryLabel(row.jobCategory)}
                     </TableCell>
-                    <TableCell className="hidden px-3 py-3.5 text-white/70 lg:table-cell">
+                    <TableCell
+                      className={cn("hidden lg:table-cell", bodyClass)}
+                    >
                       {row.jobType}
                     </TableCell>
-                    <TableCell className="px-3 py-3.5 whitespace-nowrap text-white/70">
+                    <TableCell className={cn(bodyClass, "whitespace-nowrap")}>
                       {row.applicants}
                     </TableCell>
-                    <TableCell className="px-3 py-3.5 whitespace-nowrap text-white/70">
+                    <TableCell className={cn(bodyClass, "whitespace-nowrap")}>
                       {row.datePosted}
                     </TableCell>
-                    <TableCell className="px-3 py-3.5">
+                    <TableCell className={cellClass}>
                       <Badge
                         className={cn(
                           "border-transparent",
@@ -273,7 +314,7 @@ export function ManageJobs() {
                         {row.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-3 py-3.5 text-right">
+                    <TableCell className={cn(cellClass, "text-right")}>
                       <RowActions
                         row={row}
                         onToggleStatus={toggleStatus}
@@ -300,56 +341,70 @@ function RowActions({
   onToggleStatus: (id: string) => void
   onDelete: (row: ManageJobRow) => void
 }) {
+  /* The menu unmounts when it closes, so the confirm dialog lives here as a
+     sibling — opened by state instead of an AlertDialogTrigger. */
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        aria-label={`Actions for ${row.jobTitle}`}
-        className="flex size-8 items-center justify-center rounded-[8px] text-white/60 transition-colors outline-none hover:bg-white/10 hover:text-white focus-visible:bg-white/10"
-      >
-        <EllipsisIcon className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-52 border border-white/10 bg-[#1e1e21] p-1.5 text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)]"
-      >
-        {/* No edit route yet — `?edit=` is a no-op placeholder until it exists */}
-        <DropdownMenuItem
-          render={
-            <Link href={`/dashboard/recruiter/jobs/new?edit=${row._id}`} />
-          }
-          className={itemClass}
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          aria-label={`Actions for ${row.jobTitle}`}
+          className="flex size-8 items-center justify-center rounded-[8px] text-white/60 transition-colors outline-none hover:bg-white/10 hover:text-white focus-visible:bg-white/10"
         >
-          <PencilIcon className="size-4" />
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          render={<Link href="/dashboard/recruiter/applications" />}
-          className={itemClass}
+          <EllipsisIcon className="size-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-52 border border-white/10 bg-[#1e1e21] p-1.5 text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)]"
         >
-          <EyeIcon className="size-4" />
-          View Applicants
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => onToggleStatus(row._id)}
-          className={itemClass}
-        >
-          {row.status === "Closed" ? (
-            <RotateCcwIcon className="size-4" />
-          ) : (
-            <BanIcon className="size-4" />
-          )}
-          {row.status === "Closed" ? "Reopen" : "Close"}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-white/10" />
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={() => onDelete(row)}
-          className="gap-2.5 rounded-[8px] px-2.5 py-2 text-sm"
-        >
-          <Trash2Icon className="size-4" />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {/* No edit route yet — `?edit=` is a no-op placeholder until it exists */}
+          <DropdownMenuItem
+            render={
+              <Link href={`/dashboard/recruiter/jobs/new?edit=${row._id}`} />
+            }
+            className={itemClass}
+          >
+            <PencilIcon className="size-4" />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            render={<Link href="/dashboard/recruiter/applications" />}
+            className={itemClass}
+          >
+            <EyeIcon className="size-4" />
+            View Applicants
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => onToggleStatus(row._id)}
+            className={itemClass}
+          >
+            {row.status === "Closed" ? (
+              <RotateCcwIcon className="size-4" />
+            ) : (
+              <BanIcon className="size-4" />
+            )}
+            {row.status === "Closed" ? "Reopen" : "Close"}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => setConfirmOpen(true)}
+            className="gap-2.5 rounded-[8px] px-2.5 py-2 text-sm"
+          >
+            <Trash2Icon className="size-4" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={`Delete "${row.jobTitle}"?`}
+        description={`This will permanently delete this job post and its listing. This action cannot be undone.`}
+        onConfirm={() => onDelete(row)}
+      />
+    </>
   )
 }

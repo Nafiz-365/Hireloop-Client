@@ -1,4 +1,4 @@
-import { FormValues } from "@/features/dashboard/components/JobPostForm"
+import type { FormValues } from "@/features/dashboard/types"
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
 
